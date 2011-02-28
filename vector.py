@@ -1,4 +1,7 @@
 import pickle
+import pyglet
+from pyglet import gl
+import util
 
 class Point(object):
     def __init__(self,x,y):
@@ -39,8 +42,11 @@ class Point(object):
 
 class Link(object):
     def __init__(self,point1,point2,highlight):
-        self.points = set((point1,point2))
+        self.points = [point1,point2]
         self.highlight = highlight
+        
+    def other(self,point):
+        return self.points.difference((point,)).pop()
 
     def __contains__(self,value):
         return value in self.points
@@ -49,16 +55,46 @@ class Link(object):
         return "<Link instance between %s, %s, Higlight = %s>"%tuple((map(lambda x:str(x.pos),self.points)+[str(self.highlight)]))
 
 class Vector(object):
-    def __init__(self,filename=False):
-        self.points = []
+    def __init__(self,colour = (255,0,0),filename=False):
+        self.points = set()
+        self.colour = (255,0,0)
 
         if filename:
             self.load(filename)
 
     def add_point(self, x,y):
         new_point = Point(x,y)
-        self.points.append(new_point)
+        self.points.add(new_point)
         return new_point
+    
+    def nearest_point(self,pos):
+        min = None
+        min_dist = 1000000 ## not a great soultion but the simplest
+        for point in set:
+            dist = util.point_dist(point.pos,pos)
+            
+    def draw(self):
+        ## ALL OUT OF DATE AND UNUSED AS OF YET
+        #pts = []
+        #col = []
+        #for link in self.links:
+        #    pts.append(link.points[0].pos)
+        #    pts.append(link.points[1].pos)
+        #    if link.highlight:
+        #        col.append(self.colour)
+        #        col.append(self.colour)
+        #    else:
+        #        col.append((255,255,255))
+        #        col.append((255,255,255))
+        #print col
+        #gl.glBegin(gl.GL_LINES)
+        #for position,color in zip(pts, col):
+        #    print color
+        #    gl.glColor3ub(*color)
+        #    gl.glVertex2f(position[0]*20,position[1]*20)
+        #    print position
+        #gl.glEnd()
+        pass
 
     @property
     def links(self):
@@ -96,17 +132,19 @@ class Vector(object):
     def __repr__(self):
         return "<Vector instance with %d points >"%len(self.points)
 
-## A few little Tests
-##v = Vector()
-##
-##a = v.add_point(1,1)
-##b = v.add_point(1,2)
-##c = v.add_point(2,2)
-##
-##a.link(b)
-##b.link(c)
-##c.link(a)
-##
-##v.save("test")
-##print Vector("test")
+ ##A few little Tests
+v = Vector()
+
+a = v.add_point(+10,+10)
+b = v.add_point(+10,-10)
+c = v.add_point(-10,-10)
+d = v.add_point(-10,+10)
+
+a.link(b)
+b.link(c,True)
+c.link(d,True)
+d.link(a)
+
+v.save("test")
+print Vector("test")
 
