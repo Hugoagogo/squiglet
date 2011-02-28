@@ -22,7 +22,7 @@ class Point(object):
         self.links.add(new_link)
         point.links.add(new_link)
 
-    def edit_draw(self):
+    def draw(self):
         pass
 
     def __del__(self):
@@ -57,7 +57,7 @@ class Link(object):
 class Vector(object):
     def __init__(self,colour = (255,0,0),filename=False):
         self.points = set()
-        self.colour = (255,0,0)
+        self.colour = colour
 
         if filename:
             self.load(filename)
@@ -68,6 +68,7 @@ class Vector(object):
         return new_point
     
     def nearest_point(self,pos):
+        """ Return the point in vector closest to position """
         min = None
         min_dist = 1000000 ## not a great soultion but the simplest
         for point in set:
@@ -98,6 +99,7 @@ class Vector(object):
 
     @property
     def links(self):
+        """ all of the links (lines to be drawn) of all the vectors's points """
         links = set()
         for point in self.points:
             links |= point.links

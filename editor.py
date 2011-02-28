@@ -24,24 +24,18 @@ class GameWindow(Window):
     def on_draw(self):
         self.clear()
         
-        pts = []
-        col = []
-        print self.vector
-        for link in self.vector.links:
-            pts.append(link.points[0].pos)
-            pts.append(link.points[1].pos)
-            if link.highlight:
-                col.append(self.vector.colour)
-                col.append(self.vector.colour)
-            else:
-                col.append((255,255,255))
-                col.append((255,255,255))
-        print col
         gl.glBegin(gl.GL_LINES)
-        for position, color in zip(pts, col):
-            gl.glColor3ub(*color)
-            gl.glVertex2f((position[0]*self.view_scale)+self.width/2,(position[1]*self.view_scale)+self.height/2)
-            print position
+        for link in self.vector.links:
+            if link.highlight:
+                gl.glColor3ub(*self.vector.colour)
+                gl.glColor3ub(*self.vector.colour)
+            else:
+                gl.glColor3ub(*(255,255,255))
+                gl.glColor3ub(*(255,255,255))
+                
+            gl.glVertex2f((link.points[0].x*self.view_scale)+self.width/2,(link.points[0].y*self.view_scale)+self.height/2)
+            gl.glVertex2f((link.points[1].x*self.view_scale)+self.width/2,(link.points[1].y*self.view_scale)+self.height/2)
+
         gl.glEnd()
         
     def on_mouse_motion(self, x, y, dx, dy):
