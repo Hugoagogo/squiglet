@@ -9,6 +9,13 @@ from pyglet import app, clock, graphics, gl
 from pyglet.window import key, Window, mouse
 from pyglet.window.key import symbol_string
 
+POINT_DELTAS = [
+    (+3,+3),
+    (+3,-3),
+    (-3,-3),
+    (-3,+3)
+    ]
+
 class GameWindow(Window):
     def __init__(self, view_size=(10,10),*args, **kwargs):
         Window.__init__(self, *args, **kwargs)
@@ -23,7 +30,6 @@ class GameWindow(Window):
         
     def on_draw(self):
         self.clear()
-        
         gl.glBegin(gl.GL_LINES)
         for link in self.vector.links:
             if link.highlight:
@@ -35,8 +41,23 @@ class GameWindow(Window):
                 
             gl.glVertex2f((link.points[0].x*self.view_scale)+self.width/2,(link.points[0].y*self.view_scale)+self.height/2)
             gl.glVertex2f((link.points[1].x*self.view_scale)+self.width/2,(link.points[1].y*self.view_scale)+self.height/2)
-
+            print (link.points[0].x*self.view_scale)+self.width/2,(link.points[0].y*self.view_scale)+self.height/2
         gl.glEnd()
+        
+        for point in self.vector.points:
+            gl.glBegin(gl.GL_POLYGON)
+            if point == self.active_point:
+                for x in range(4): gl.glColor3ub(*(255,125,100))
+            else:
+                for x in range(4): gl.glColor3ub(*(255,255,255))
+            print point
+            for delta in POINT_DELTAS:
+                #print point.x*self.view_scale+delta[0],point.y*self.view_scale+delta[1]
+                gl.glVertex2f(point.x*self.view_scale+delta[0]+self.width/2,point.y*self.view_scale+delta[1]+self.height/2)
+                
+            
+                
+            gl.glEnd()
         
     def on_mouse_motion(self, x, y, dx, dy):
         pass
@@ -52,5 +73,5 @@ class GameWindow(Window):
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         pass
 stdout.flush()
-win = GameWindow((20,20))
+win = GameWindow((21,21))
 app.run()
