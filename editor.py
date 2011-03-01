@@ -3,6 +3,7 @@ from sys import stdout
 from math import pi
 import random
 import vector
+import operator
 
 ## Pyglet Imports
 from pyglet import app, clock, graphics, gl
@@ -32,8 +33,11 @@ class GameWindow(Window):
     def __init__(self, view_size=(10,10),*args, **kwargs):
         Window.__init__(self, *args, **kwargs)
         self.set_mouse_visible(True)
+        
         self.vector = vector.Vector(LINE_HIGHLIGHT_COLOUR,"test")
         self.active_point = None
+        self.first_point = None
+        
         self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
         self.view_size = view_size
 
@@ -62,7 +66,7 @@ class GameWindow(Window):
             else:
                 for x in range(4): gl.glColor3ub(*POINT_COLOUR)
             for delta in POINT_DELTAS:
-                gl.glVertex2f(point.x*self.view_scale+delta[0]+self.width/2,point.y*self.view_scale+delta[1]+self.height/2)
+                gl.glVertex2f(*tuple(map(operator.add, self.vector_to_screen(point.x,point.y),delta)))
                 
             gl.glEnd()
         
@@ -77,16 +81,18 @@ class GameWindow(Window):
             if self.active_point:
                 print new_point.link(self.active_point,highlight)
             else:
-                self.first = new_point
+                self.first_point = new_point
             print len(self.vector.links)
             self.active_point = new_point
-        elif button == mouse.RIGHT:
+            
+        elif button == mouse.RIGHT and self.active_point:
             if not len(self.active_point.links):
-                del self.active_point
+                self.vector.points.remove(self.active_point)
             self.active_point = None
-        elif button == mouse.MIDDLE and self.active_point:
-            new_point = self.vector.add_point(*self.screen_to_vector(x,y))
-            new_point.link(self.active_point,highlight)
+            
+        elif button == mouse.MIDDLE and self.active_point and self.first_point:
+            self.first_point.link(self.active_point,highlight)
+            self.active_point = self.first_point = None
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         pass
