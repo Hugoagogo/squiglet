@@ -45,9 +45,6 @@ class Link(object):
     def __init__(self,point1,point2,highlight):
         self.points = [point1,point2]
         self.highlight = highlight
-        
-    def other(self,point):
-        return self.points.difference((point,)).pop()
 
     def __contains__(self,value):
         return value in self.points
@@ -154,5 +151,4 @@ c.link(d,True)
 d.link(a)
 
 v.save("test")
-print Vector("test")
 

@@ -1,9 +1,12 @@
+## Standard Imports
 from __future__ import division
 from sys import stdout
 from math import pi
 import random
+
+## Custom Imports
 import vector
-import operator
+import util
 
 ## Pyglet Imports
 from pyglet import app, clock, graphics, gl
@@ -55,8 +58,8 @@ class GameWindow(Window):
                 gl.glColor3ub(*LINE_COLOUR)
                 gl.glColor3ub(*LINE_COLOUR)
                 
-            gl.glVertex2f(*self.vector_to_screen(link.points[0].x,link.points[0].y))
-            gl.glVertex2f(*self.vector_to_screen(link.points[1].x,link.points[1].y))
+            gl.glVertex2f(*self.vector_to_screen(*link.points[0].pos))
+            gl.glVertex2f(*self.vector_to_screen(*link.points[1].pos))
         gl.glEnd()
         
         for point in self.vector.points:
@@ -66,7 +69,7 @@ class GameWindow(Window):
             else:
                 for x in range(4): gl.glColor3ub(*POINT_COLOUR)
             for delta in POINT_DELTAS:
-                gl.glVertex2f(*tuple(map(operator.add, self.vector_to_screen(point.x,point.y),delta)))
+                gl.glVertex2f(*util.add_tup(self.vector_to_screen(*point.pos),delta))
                 
             gl.glEnd()
         
@@ -75,14 +78,13 @@ class GameWindow(Window):
     
     def on_mouse_press(self,x,y,button,modifier):
         highlight = modifier & key.MOD_SHIFT
-        print len(self.vector.links)
         if button == mouse.LEFT:
+            #self.vector.closest_point(x,y)
             new_point = self.vector.add_point(*self.screen_to_vector(x,y))
             if self.active_point:
-                print new_point.link(self.active_point,highlight)
+                new_point.link(self.active_point,highlight)
             else:
                 self.first_point = new_point
-            print len(self.vector.links)
             self.active_point = new_point
             
         elif button == mouse.RIGHT and self.active_point:

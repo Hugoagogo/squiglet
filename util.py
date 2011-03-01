@@ -1,4 +1,6 @@
 import math
+import operator
+
 def point_dist(p1,p2):
     return ((p1[0]**2 + p2[0]**2)+(p1[1]**2 + p2[1]**2))*0.5
     
@@ -11,4 +13,7 @@ def generate_circle(radius,pos=(0,0),segments=10):
         positions.append((x+pos[0],y+pos[1]))
     return positions
         
+    
+def add_tup(t1,t2):
+    return tuple(map(operator.add, t1,t2))
     
