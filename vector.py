@@ -13,9 +13,10 @@ class Point(object):
     def link(self,point,highlight = False):
         """ Create the link on both sides """
         if point == self:
-            return
+            return ## why link to yourself
         for link in self.links:
             if point in link:
+                link.highlight = highlight
                 return ## Already linked so dont bother
             
         new_link = Link(self,point,highlight)

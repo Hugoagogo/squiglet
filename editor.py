@@ -15,7 +15,7 @@ from pyglet.window.key import symbol_string
 
 SQUARE_SIZE = 3
 
-SNAP_DIST = .3
+SNAP_DIST = .4
 
 POINT_DELTAS = [
     (+SQUARE_SIZE,+SQUARE_SIZE),
@@ -40,6 +40,7 @@ class GameWindow(Window):
         self.vector = vector.Vector(LINE_HIGHLIGHT_COLOUR,"test")
         self.active_point = None
         self.first_point = None
+        self.hover_point = None
         
         self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
         self.view_size = view_size
@@ -64,7 +65,9 @@ class GameWindow(Window):
         
         for point in self.vector.points:
             gl.glBegin(gl.GL_POLYGON)
-            if point == self.active_point:
+            if point == self.hover_point:
+                for x in range(4): gl.glColor3ub(*POINT_HOVER_COLOUR)
+            elif point == self.active_point:
                 for x in range(4): gl.glColor3ub(*POINT_ACTIVE_COLOUR)
             else:
                 for x in range(4): gl.glColor3ub(*POINT_COLOUR)
@@ -74,13 +77,16 @@ class GameWindow(Window):
             gl.glEnd()
         
     def on_mouse_motion(self, x, y, dx, dy):
-        pass
+        nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+        if nearest_dist < SNAP_DIST:
+            self.hover_point = nearest
+        else:
+            self.hover_point = None
     
     def on_mouse_press(self,x,y,button,modifier):
         highlight = modifier & key.MOD_SHIFT
         if button == mouse.LEFT:
             nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
-            print nearest_dist
             if nearest_dist > SNAP_DIST: 
                 new_point = self.vector.add_point(*self.screen_to_vector(x,y))
                 if self.active_point:
