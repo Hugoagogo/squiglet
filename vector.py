@@ -65,11 +65,13 @@ class Vector(object):
         self.points.add(new_point)
         return new_point
     
-    def nearest_point(self,pos):
+    def nearest_point(self,*pos):
         """ Return the point in vector closest to position """
+        if len(pos) == 1:
+            pos = pos[0]
         min = None
         min_dist = 1000000 ## not a great soultion but the simplest
-        for point in set:
+        for point in self.points:
             dist = util.point_dist(point.pos,pos)
             if dist < min_dist:
                 min = point

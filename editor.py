@@ -15,7 +15,7 @@ from pyglet.window.key import symbol_string
 
 SQUARE_SIZE = 3
 
-SNAP_DIST = 5
+SNAP_DIST = .3
 
 POINT_DELTAS = [
     (+SQUARE_SIZE,+SQUARE_SIZE),
@@ -79,13 +79,19 @@ class GameWindow(Window):
     def on_mouse_press(self,x,y,button,modifier):
         highlight = modifier & key.MOD_SHIFT
         if button == mouse.LEFT:
-            #self.vector.closest_point(x,y)
-            new_point = self.vector.add_point(*self.screen_to_vector(x,y))
-            if self.active_point:
-                new_point.link(self.active_point,highlight)
+            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+            print nearest_dist
+            if nearest_dist > SNAP_DIST: 
+                new_point = self.vector.add_point(*self.screen_to_vector(x,y))
+                if self.active_point:
+                    new_point.link(self.active_point,highlight)
+                else:
+                    self.first_point = new_point
+                self.active_point = new_point
             else:
-                self.first_point = new_point
-            self.active_point = new_point
+                if self.active_point:
+                    self.active_point.link(nearest)
+                self.active_point = nearest
             
         elif button == mouse.RIGHT and self.active_point:
             if not len(self.active_point.links):
