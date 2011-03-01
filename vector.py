@@ -21,6 +21,7 @@ class Point(object):
         new_link = Link(self,point,highlight)
         self.links.add(new_link)
         point.links.add(new_link)
+        return new_link
 
     def draw(self):
         pass
@@ -62,7 +63,7 @@ class Vector(object):
         if filename:
             self.load(filename)
 
-    def add_point(self, x,y):
+    def add_point(self, x, y):
         new_point = Point(x,y)
         self.points.add(new_point)
         return new_point
@@ -73,6 +74,11 @@ class Vector(object):
         min_dist = 1000000 ## not a great soultion but the simplest
         for point in set:
             dist = util.point_dist(point.pos,pos)
+            if dist < min_dist:
+                min = point
+                min_dist = dist
+            
+        return min, min_dist
             
     def draw(self):
         ## ALL OUT OF DATE AND UNUSED AS OF YET
