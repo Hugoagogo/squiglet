@@ -17,6 +17,8 @@ SQUARE_SIZE = 3
 
 SNAP_DIST = .4
 
+AA_SAMPLES = 4
+
 POINT_DELTAS = [
     (+SQUARE_SIZE,+SQUARE_SIZE),
     (+SQUARE_SIZE,-SQUARE_SIZE),
@@ -126,5 +128,5 @@ class GameWindow(Window):
             (y-(self.height/2))/self.view_scale
         )
 stdout.flush()
-win = GameWindow((21,21))
+win = GameWindow((21,21),config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
 app.run()
