@@ -3,6 +3,7 @@ from __future__ import division
 from sys import stdout
 from math import pi
 import random
+import Tkinter, tkFileDialog
 
 ## Custom Imports
 import vector
@@ -33,6 +34,13 @@ POINT_COLOUR = (255,255,255)
 POINT_ACTIVE_COLOUR = (255,255,0)
 POINT_HOVER_COLOUR = (0,255,255)
 
+def SaveAs():
+    root = Tkinter.Tk()
+    root.withdraw()
+    filename = tkFileDialog.asksaveasfilename(title="Save vector as")
+    print filename
+    
+    
 
 class GameWindow(Window):
     def __init__(self, view_size=(10,10),*args, **kwargs):
@@ -85,8 +93,8 @@ class GameWindow(Window):
         else:
             self.hover_point = None
     
-    def on_mouse_press(self,x,y,button,modifier):
-        highlight = modifier & key.MOD_SHIFT
+    def on_mouse_press(self,x,y,button,modifiers):
+        highlight = modifiers & key.MOD_SHIFT
         if button == mouse.LEFT:
             nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
             if nearest_dist > SNAP_DIST: 
@@ -109,6 +117,10 @@ class GameWindow(Window):
         elif button == mouse.MIDDLE and self.active_point and self.first_point:
             self.first_point.link(self.active_point,highlight)
             self.active_point = self.first_point = None
+            
+    def on_key_press(self,pressed,modifiers):
+        if pressed == key.S and modifiers & key.MOD_CTRL:
+            SaveAs()
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         pass
@@ -127,6 +139,7 @@ class GameWindow(Window):
             (x-(self.width/2))/self.view_scale,
             (y-(self.height/2))/self.view_scale
         )
+
 stdout.flush()
 win = GameWindow((21,21),config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
 app.run()
