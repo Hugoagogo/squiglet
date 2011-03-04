@@ -118,15 +118,18 @@ class GameWindow(Window):
             self.first_point.link(self.active_point,highlight)
             self.active_point = self.first_point = None
             
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+        if nearest_dist > SNAP_DIST:
+            nearest.pos = self.screen_to_vector(x,y)
+            print nearest.pos
+            
     def on_key_press(self,pressed,modifiers):
         if pressed == key.S and modifiers & key.MOD_CTRL:
             SaveAs()
 
-    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        pass
-
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        pass
+        print "ARG"
     
     def vector_to_screen(self,x,y):
         return (
