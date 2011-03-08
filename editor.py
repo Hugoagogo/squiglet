@@ -51,6 +51,7 @@ class GameWindow(Window):
         self.active_point = None
         self.first_point = None
         self.hover_point = None
+        self.dragging_point = None
         
         self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
         self.view_size = view_size
@@ -61,6 +62,7 @@ class GameWindow(Window):
     def on_draw(self):
         self.clear()
         gl.glBegin(gl.GL_LINES)
+        print len(self.vector.links)
         for link in self.vector.links:
             if link.highlight:
                 gl.glColor3ub(*self.vector.colour)
@@ -92,37 +94,54 @@ class GameWindow(Window):
             self.hover_point = nearest
         else:
             self.hover_point = None
-    
-    def on_mouse_press(self,x,y,button,modifiers):
-        highlight = modifiers & key.MOD_SHIFT
-        if button == mouse.LEFT:
-            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
-            if nearest_dist > SNAP_DIST: 
-                new_point = self.vector.add_point(*self.screen_to_vector(x,y))
-                if self.active_point:
-                    new_point.link(self.active_point,highlight)
-                else:
-                    self.first_point = new_point
-                self.active_point = new_point
+            
+    def on_mouse_release(self,x,y,button,modifiers):
+        
+        ## Drgging action
+        if self.dragging_point:
+            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y),exclude = [self.dragging_point])
+            if nearest != self.dragging_point and nearest_dist < SNAP_DIST:
+                for link in self.dragging_point.links:
+                    nearest.link(link.other(self.dragging_point))
+                self.vector.remove_point(self.dragging_point)
+                    
             else:
-                if self.active_point:
-                    self.active_point.link(nearest)
-                self.active_point = nearest
+                self.dragging_point.pos = self.screen_to_vector(x,y)
+            self.dragging_point = None
             
-        elif button == mouse.RIGHT and self.active_point:
-            if not len(self.active_point.links):
-                self.vector.points.remove(self.active_point)
-            self.active_point = None
-            
-        elif button == mouse.MIDDLE and self.active_point and self.first_point:
-            self.first_point.link(self.active_point,highlight)
-            self.active_point = self.first_point = None
-            
+        ## Normal Actions
+        else:
+            highlight = modifiers & key.MOD_SHIFT
+            if button == mouse.LEFT:
+                nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+                if nearest_dist > SNAP_DIST:
+                    new_point = self.vector.add_point(*self.screen_to_vector(x,y))
+                    if self.active_point:
+                        new_point.link(self.active_point,highlight)
+                    else:
+                        self.first_point = new_point
+                    self.active_point = new_point
+                else:
+                    if self.active_point:
+                        self.active_point.link(nearest)
+                    self.active_point = nearest
+                
+            elif button == mouse.RIGHT and self.active_point:
+                if not len(self.active_point.links):
+                    self.vector.points.remove(self.active_point)
+                self.active_point = None
+                
+            elif button == mouse.MIDDLE and self.active_point and self.first_point:
+                self.first_point.link(self.active_point,highlight)
+                self.active_point = self.first_point = None
+    
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
-        if nearest_dist > SNAP_DIST:
-            nearest.pos = self.screen_to_vector(x,y)
-            print nearest.pos
+        if not self.dragging_point:
+            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+            if nearest_dist < SNAP_DIST:
+                self.dragging_point = nearest
+        else:
+            self.dragging_point.pos = self.screen_to_vector(x,y)
             
     def on_key_press(self,pressed,modifiers):
         if pressed == key.S and modifiers & key.MOD_CTRL:

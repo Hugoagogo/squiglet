@@ -23,14 +23,19 @@ class Point(object):
         self.links.add(new_link)
         point.links.add(new_link)
         return new_link
+    
+    def unlink(self):
+        for link in self.links:
+            link.other(self).links.remove(link)
+        self.links.clear()
 
     def draw(self):
         pass
 
     def __del__(self):
         """ Do some cleanup """
-        for link in self.links:
-            del link
+        self.unlink()
+        print "deaded"
 
     def pos_get(self):
         return self.x,self.y
@@ -46,6 +51,14 @@ class Link(object):
     def __init__(self,point1,point2,highlight):
         self.points = [point1,point2]
         self.highlight = highlight
+        
+    def other(self,point):
+        if self.points[0] == point:
+            return self.points[1]
+        elif self.points[1] == point:
+            return self.points[0]
+        else:
+            raise ValueError("Point not in link")
 
     def __contains__(self,value):
         return value in self.points
@@ -66,17 +79,29 @@ class Vector(object):
         self.points.add(new_point)
         return new_point
     
-    def nearest_point(self,*pos):
+    def remove_point(self,point):
+        point.unlink()
+        self.points.discard(point)
+        print self.points
+        del point
+    
+    def nearest_point(self,*pos,**other):
         """ Return the point in vector closest to position """
         if len(pos) == 1:
             pos = pos[0]
+        if "exclude" in other:
+            exclude = other['exclude']
+            print "HHHHHHHHHHHHH"
+        else:
+            exclude = []
         min = None
         min_dist = 1000000 ## not a great soultion but the simplest
         for point in self.points:
-            dist = util.point_dist(point.pos,pos)
-            if dist < min_dist:
-                min = point
-                min_dist = dist
+            if not point in exclude:
+                dist = util.point_dist(point.pos,pos)
+                if dist < min_dist:
+                    min = point
+                    min_dist = dist
             
         return min, min_dist
             
