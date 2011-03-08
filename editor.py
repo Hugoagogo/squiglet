@@ -38,9 +38,13 @@ def SaveAs():
     root = Tkinter.Tk()
     root.withdraw()
     filename = tkFileDialog.asksaveasfilename(title="Save vector as")
-    print filename
+    return filename
     
-    
+def LoadAs():
+    root = Tkinter.Tk()
+    root.withdraw()
+    filename = tkFileDialog.askopenfilename(title="Load vector")
+    return filename
 
 class GameWindow(Window):
     def __init__(self, view_size=(10,10),*args, **kwargs):
@@ -62,7 +66,6 @@ class GameWindow(Window):
     def on_draw(self):
         self.clear()
         gl.glBegin(gl.GL_LINES)
-        print len(self.vector.links)
         for link in self.vector.links:
             if link.highlight:
                 gl.glColor3ub(*self.vector.colour)
@@ -145,7 +148,13 @@ class GameWindow(Window):
             
     def on_key_press(self,pressed,modifiers):
         if pressed == key.S and modifiers & key.MOD_CTRL:
-            SaveAs()
+            path = SaveAs()
+            if path:
+                self.vector.save(path)
+        elif pressed == key.L and modifiers & key.MOD_CTRL:
+            path = LoadAs()
+            if path:
+                self.vector.load(path)
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print "ARG"

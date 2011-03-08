@@ -35,7 +35,6 @@ class Point(object):
     def __del__(self):
         """ Do some cleanup """
         self.unlink()
-        print "deaded"
 
     def pos_get(self):
         return self.x,self.y
@@ -91,7 +90,6 @@ class Vector(object):
             pos = pos[0]
         if "exclude" in other:
             exclude = other['exclude']
-            print "HHHHHHHHHHHHH"
         else:
             exclude = []
         min = None
@@ -157,13 +155,14 @@ class Vector(object):
 
     def load_d(self,data):
         """ Loads a vetor from a python datastructure NOTE wipes current Vector if called """
+        self.__init__(self.colour) ## Reset all the vector stuff
         for point in data['pout']:
             data['pout'][point] = self.add_point(*data['pout'][point])
         for link in data['lout']:
             data['pout'][link[0][0]].link(data['pout'][link[0][1]],link[1])
 
     def __repr__(self):
-        return "<Vector instance with %d points >"%len(self.points)
+        return "<Vector instance with %d points >" % len(self.points)
 
  ##A few little Tests
 v = Vector()
