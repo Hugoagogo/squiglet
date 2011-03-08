@@ -51,15 +51,19 @@ class GameWindow(Window):
         Window.__init__(self, *args, **kwargs)
         self.set_mouse_visible(True)
         
-        self.vector = vector.Vector(LINE_HIGHLIGHT_COLOUR,"test")
+        self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
+        self.view_size = view_size
+        
+        self.setup()
+    
+    def setup(self,filename=False):
         self.active_point = None
         self.first_point = None
         self.hover_point = None
         self.dragging_point = None
         
-        self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
-        self.view_size = view_size
-
+        self.vector = vector.Vector(LINE_HIGHLIGHT_COLOUR,filename)
+    
     def on_update(self):
         pass
         
@@ -151,10 +155,12 @@ class GameWindow(Window):
             path = SaveAs()
             if path:
                 self.vector.save(path)
+            self.activate()
         elif pressed == key.L and modifiers & key.MOD_CTRL:
             path = LoadAs()
             if path:
-                self.vector.load(path)
+                self.setup(path)
+            self.activate()
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print "ARG"

@@ -155,7 +155,7 @@ class Vector(object):
 
     def load_d(self,data):
         """ Loads a vetor from a python datastructure NOTE wipes current Vector if called """
-        self.__init__(self.colour) ## Reset all the vector stuff
+        self.points = set()
         for point in data['pout']:
             data['pout'][point] = self.add_point(*data['pout'][point])
         for link in data['lout']:
