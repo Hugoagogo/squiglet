@@ -37,13 +37,13 @@ POINT_HOVER_COLOUR = (0,255,255)
 def SaveAs():
     root = Tkinter.Tk()
     root.withdraw()
-    filename = tkFileDialog.asksaveasfilename(title="Save vector as")
+    filename = tkFileDialog.asksaveasfilename(title="Save vector as",filetypes = [ ('squiglet files', '.sgl'),('all files', '.*')])
     return filename
     
 def LoadAs():
     root = Tkinter.Tk()
     root.withdraw()
-    filename = tkFileDialog.askopenfilename(title="Load vector")
+    filename = tkFileDialog.askopenfilename(title="Load vector",filetypes = [ ('squiglet files', '.sgl'),('all files', '.*')])
     return filename
 
 class GameWindow(Window):
