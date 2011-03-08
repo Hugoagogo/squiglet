@@ -103,7 +103,6 @@ class GameWindow(Window):
             self.hover_point = None
             
     def on_mouse_release(self,x,y,button,modifiers):
-        
         ## Drgging action
         if self.dragging_point:
             nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y),exclude = [self.dragging_point])
@@ -130,7 +129,7 @@ class GameWindow(Window):
                     self.active_point = new_point
                 else:
                     if self.active_point:
-                        self.active_point.link(nearest)
+                        self.active_point.link(nearest,highlight)
                     self.active_point = nearest
                 
             elif button == mouse.RIGHT and self.active_point:
@@ -155,11 +154,13 @@ class GameWindow(Window):
             path = SaveAs()
             if path:
                 self.vector.save(path)
+                print "Saved: %s"%(path)
             self.activate()
         elif pressed == key.L and modifiers & key.MOD_CTRL:
             path = LoadAs()
             if path:
                 self.setup(path)
+                print "Loaded: %s"%(path)
             self.activate()
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
