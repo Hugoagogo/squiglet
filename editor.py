@@ -6,7 +6,7 @@ import random
 import Tkinter, tkFileDialog, tkMessageBox
 
 ## Custom Imports
-import vector
+import __init__ as squiglet
 import util
 
 ## Pyglet Imports
@@ -91,7 +91,7 @@ class GameWindow(Window):
         self.hover_point = None
         self.dragging_point = None
         
-        self.vector = vector.Vector(LINE_HIGHLIGHT_COLOUR,filename)
+        self.vector = squiglet.Vector(LINE_HIGHLIGHT_COLOUR,filename)
     
     def on_update(self):
         pass
@@ -161,6 +161,7 @@ class GameWindow(Window):
                         if not modifiers & key.MOD_CTRL:
                             self.active_point.link(nearest,highlight)
                         else:
+                            print "DELETED"
                             self.active_point.unlink(nearest)
                     self.active_point = nearest
                 
@@ -219,6 +220,7 @@ class GameWindow(Window):
             (y-(self.height/2))/self.view_scale
         )
 
-stdout.flush()
-win = GameWindow((21,21),config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
-app.run()
+if __name__ == '__main__':
+    stdout.flush()
+    win = GameWindow((21,21),config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
+    app.run()

@@ -24,10 +24,16 @@ class Point(object):
         point.links.add(new_link)
         return new_link
     
-    def unlink(self):
-        for link in self.links:
-            link.other(self).links.remove(link)
-        self.links.clear()
+    def unlink(self,point=None):
+        if point:
+            for link in self.links:
+                if link.other(self) == point:
+                    del link
+                    print "UNLINKED"
+        else:
+            for link in self.links:
+                link.other(self).links.remove(link)
+            self.links.clear()
 
     def draw(self):
         pass
@@ -58,6 +64,11 @@ class Link(object):
             return self.points[0]
         else:
             raise ValueError("Point not in link")
+            
+    def __del__(self):
+        self.points[0].links.discard(self)
+        self.points[1].links.discard(self)
+        print len(self.points[0])
 
     def __contains__(self,value):
         return value in self.points
