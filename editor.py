@@ -3,7 +3,7 @@ from __future__ import division
 from sys import stdout
 from math import pi
 import random
-import Tkinter, tkFileDialog
+import Tkinter, tkFileDialog, tkMessageBox
 
 ## Custom Imports
 import vector
@@ -13,6 +13,20 @@ import util
 from pyglet import app, clock, graphics, gl
 from pyglet.window import key, Window, mouse
 from pyglet.window.key import symbol_string
+
+help = """
+Create a point\tLeft Click
+Clear active point\tRight Click
+Close loop\tMiddle Click
+Delete active point\tDelete
+Clear all points\tCTRL-D
+Move a point\tClick and drag
+
+Save using\tCTRL-S
+Load using\tCTRL-L
+
+Open this help file\tF1 or CTRL-H
+"""
 
 SQUARE_SIZE = 3
 
@@ -38,13 +52,28 @@ def SaveAs():
     root = Tkinter.Tk()
     root.withdraw()
     filename = tkFileDialog.asksaveasfilename(title="Save vector as",filetypes = [ ('squiglet files', '.sgl'),('all files', '.*')])
+    root.quit()
     return filename
     
 def LoadAs():
     root = Tkinter.Tk()
     root.withdraw()
     filename = tkFileDialog.askopenfilename(title="Load vector",filetypes = [ ('squiglet files', '.sgl'),('all files', '.*')])
+    root.quit()
     return filename
+
+def OkBox():
+    root = Tkinter.Tk()
+    root.withdraw()
+    status = tkMessageBox.askokcancel(title="Clear all?", message="Are you sure you want to clear all points")
+    root.quit()
+    return status
+
+def HelpBox():
+    root = Tkinter.Tk()
+    root.withdraw()
+    status = tkMessageBox.showinfo(title="Help", message=help)
+    root.quit()
 
 class GameWindow(Window):
     def __init__(self, view_size=(10,10),*args, **kwargs):
@@ -129,7 +158,10 @@ class GameWindow(Window):
                     self.active_point = new_point
                 else:
                     if self.active_point:
-                        self.active_point.link(nearest,highlight)
+                        if not modifiers & key.MOD_CTRL:
+                            self.active_point.link(nearest,highlight)
+                        else:
+                            self.active_point.unlink(nearest)
                     self.active_point = nearest
                 
             elif button == mouse.RIGHT and self.active_point:
@@ -162,6 +194,15 @@ class GameWindow(Window):
                 self.setup(path)
                 print "Loaded: %s"%(path)
             self.activate()
+        elif pressed == key.D and modifiers & key.MOD_CTRL:
+            if OkBox():
+                self.setup()
+        elif (pressed == key.H and modifiers & key.MOD_CTRL) or pressed==key.F1:
+            HelpBox()
+        elif pressed == key.DELETE or pressed == key.BACKSPACE:
+            self.vector.remove_point(self.active_point)
+            self.active_point = None
+            self.first_point = None
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print "ARG"
