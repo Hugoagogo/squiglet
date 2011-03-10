@@ -25,22 +25,20 @@ class Point(object):
         return new_link
     
     def unlink(self,point=None):
+        """ Remove links, always should be called before deleting a point """
         if point:
             for link in self.links:
                 if link.other(self) == point:
-                    del link
-                    print "UNLINKED"
+                    link.kill()
+                    break
         else:
             for link in self.links:
                 link.other(self).links.remove(link)
             self.links.clear()
 
     def draw(self):
+        """ Not actually Used """
         pass
-
-    def __del__(self):
-        """ Do some cleanup """
-        self.unlink()
 
     def pos_get(self):
         return self.x,self.y
@@ -64,11 +62,10 @@ class Link(object):
             return self.points[0]
         else:
             raise ValueError("Point not in link")
-            
-    def __del__(self):
+    
+    def kill(self):
         self.points[0].links.discard(self)
         self.points[1].links.discard(self)
-        print len(self.points[0])
 
     def __contains__(self,value):
         return value in self.points
@@ -174,19 +171,3 @@ class Vector(object):
 
     def __repr__(self):
         return "<Vector instance with %d points >" % len(self.points)
-
- ##A few little Tests
-v = Vector()
-
-a = v.add_point(+10,+10)
-b = v.add_point(+10,-10)
-c = v.add_point(-10,-10)
-d = v.add_point(-10,+10)
-
-a.link(b)
-b.link(c,True)
-c.link(d,True)
-d.link(a)
-
-v.save("test")
-
