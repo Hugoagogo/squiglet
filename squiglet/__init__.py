@@ -80,6 +80,7 @@ class Vector(object):
 
         if filename:
             self.load(filename)
+            print "LOADING", filename
 
     def add_point(self, x, y):
         new_point = Point(x,y)
@@ -111,28 +112,29 @@ class Vector(object):
             
         return min, min_dist
             
-    def draw(self):
-        ## ALL OUT OF DATE AND UNUSED AS OF YET
-        #pts = []
-        #col = []
-        #for link in self.links:
-        #    pts.append(link.points[0].pos)
-        #    pts.append(link.points[1].pos)
-        #    if link.highlight:
-        #        col.append(self.colour)
-        #        col.append(self.colour)
-        #    else:
-        #        col.append((255,255,255))
-        #        col.append((255,255,255))
-        #print col
-        #gl.glBegin(gl.GL_LINES)
-        #for position,color in zip(pts, col):
-        #    print color
-        #    gl.glColor3ub(*color)
-        #    gl.glVertex2f(position[0]*20,position[1]*20)
-        #    print position
-        #gl.glEnd()
-        pass
+    def draw(self,scale,pos):
+        LINE_COLOUR = (255,255,255)
+        gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(gl.GL_BLEND);
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+
+        
+        gl.glEnable(gl.GL_LINE_SMOOTH);
+        gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_DONT_CARE);
+
+        gl.glBegin(gl.GL_LINES)
+        for link in self.links:
+            if link.highlight:
+                gl.glColor3ub(*self.colour)
+                gl.glColor3ub(*self.colour)
+            else:
+                gl.glColor3ub(*LINE_COLOUR)
+                gl.glColor3ub(*LINE_COLOUR)
+                
+            gl.glVertex2f(*util.add_tup(pos,util.scale_tup(link.points[0].pos,scale)))
+            gl.glVertex2f(*util.add_tup(pos,util.scale_tup(link.points[1].pos,scale)))
+            print util.add_tup(pos,util.scale_tup(link.points[0].pos,scale))
+        gl.glEnd()
 
     @property
     def links(self):

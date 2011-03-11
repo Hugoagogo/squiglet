@@ -17,3 +17,8 @@ def generate_circle(radius,pos=(0,0),segments=10):
 def add_tup(t1,t2):
     return tuple(map(operator.add, t1,t2))
     
+def multiply_tup(t1,t2):
+    return tuple(map(operator.mul, t1,t2))
+
+def scale_tup(t,scale):
+    return (t[0]*scale,t[1]*scale)
