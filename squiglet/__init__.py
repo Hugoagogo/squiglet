@@ -114,11 +114,10 @@ class Vector(object):
             
     def draw(self,scale,pos):
         LINE_COLOUR = (255,255,255)
-        gl.glEnable(gl.GL_DEPTH_TEST);
-        gl.glEnable(gl.GL_BLEND);
-        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-
         
+        #gl.glEnable(gl.GL_DEPTH_TEST);
+        gl.glEnable(gl.GL_BLEND);
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_DST_ALPHA);        
         gl.glEnable(gl.GL_LINE_SMOOTH);
         gl.glHint(gl.GL_LINE_SMOOTH_HINT, gl.GL_DONT_CARE);
 
@@ -130,9 +129,12 @@ class Vector(object):
             else:
                 gl.glColor3ub(*LINE_COLOUR)
                 gl.glColor3ub(*LINE_COLOUR)
-                
-            gl.glVertex2f(*util.add_tup(pos,util.scale_tup(link.points[0].pos,scale)))
-            gl.glVertex2f(*util.add_tup(pos,util.scale_tup(link.points[1].pos,scale)))
+            if link.highlight:
+                depth = 0.5
+            else:
+                depth = 0.5
+            gl.glVertex3f(*util.add_tup(pos,util.scale_tup(link.points[0].pos,scale))+(depth,))
+            gl.glVertex3f(*util.add_tup(pos,util.scale_tup(link.points[1].pos,scale))+(depth,))
             print util.add_tup(pos,util.scale_tup(link.points[0].pos,scale))
         gl.glEnd()
 

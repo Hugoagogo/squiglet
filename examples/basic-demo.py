@@ -7,7 +7,7 @@ from pyglet.window.key import symbol_string
 
 from squiglet import Vector
 
-win = Window(config = gl.Config(sample_buffers=1, samples=8))
+win = Window()
 
 class Ship(object):
     def __init__(self,colour):
