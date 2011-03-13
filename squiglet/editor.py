@@ -169,15 +169,11 @@ class GameWindow(Window):
             
     def on_mouse_release(self,x,y,button,modifiers):
         ## Deal in vector coords
-        print (x,y),
         x,y = self.screen_to_vector(x,y)
-        print (x,y)
         ## Drgging action
         if self.dragging_point:
             snap = self.snap_candidate(x,y,[self.dragging_point])
-            print "SNAP",snap,
             if type(snap) == squiglet.Point:
-                print "DRAGGING",self.dragging_point
                 for link in self.dragging_point.links:
                     snap.link(link.other(self.dragging_point))
                 self.vector.remove_point(self.dragging_point)
@@ -193,7 +189,6 @@ class GameWindow(Window):
             if button == mouse.LEFT:
                 snap = self.snap_candidate(x,y)
                 if type(snap) == squiglet.Point:
-                    print "SNAP_POINT"
                     if self.active_point:
                         if modifiers & key.MOD_CTRL:
                             self.active_point.unlink(snap)
@@ -204,7 +199,6 @@ class GameWindow(Window):
                 else:
                     print snap
                     if type(snap) == tuple:
-                        print "ARG"
                         x,y = snap
                     new_point = self.vector.add_point(x,y)
                     if self.active_point:
@@ -231,10 +225,8 @@ class GameWindow(Window):
         else:
             snap = self.snap_candidate(x,y,[self.dragging_point])
             if type(snap) == squiglet.Point:
-                print "A",snap
                 self.dragging_point.pos = snap.pos
             elif type(snap) == tuple:
-                print "B"
                 self.dragging_point.pos = snap
             else:
                 self.dragging_point.pos = (x,y)
