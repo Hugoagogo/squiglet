@@ -93,19 +93,13 @@ class Vector(object):
         print self.points
         del point
     
-    def nearest_point(self,*pos,**other):
+    def nearest_point(self,x,y,exclude = []):
         """ Return the point in vector closest to position """
-        if len(pos) == 1:
-            pos = pos[0]
-        if "exclude" in other:
-            exclude = other['exclude']
-        else:
-            exclude = []
         min = None
         min_dist = 1000000 ## not a great soultion but the simplest
         for point in self.points:
             if not point in exclude:
-                dist = util.point_dist(point.pos,pos)
+                dist = util.point_dist(point.pos,(x,y))
                 if dist < min_dist:
                     min = point
                     min_dist = dist

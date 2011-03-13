@@ -52,7 +52,7 @@ GRID_ON = True
 GRID_SIZE = 1
 GRID_COLOUR = (75,75,75)
 GRID_SNAP = True
-GRID_SNAP_DIST = 0.2
+GRID_SNAP_DIST = .15
 
 CENTER_ON = True
 CENTER_COLOUR = GRID_COLOUR
@@ -161,45 +161,57 @@ class GameWindow(Window):
             gl.glEnd()
         
     def on_mouse_motion(self, x, y, dx, dy):
-        nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+        nearest, nearest_dist = self.vector.nearest_point(*self.screen_to_vector(x,y))
         if nearest_dist < SNAP_DIST:
             self.hover_point = nearest
         else:
             self.hover_point = None
             
     def on_mouse_release(self,x,y,button,modifiers):
+        ## Deal in vector coords
+        print (x,y),
+        x,y = self.screen_to_vector(x,y)
+        print (x,y)
         ## Drgging action
         if self.dragging_point:
-            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y),exclude = [self.dragging_point])
-            if nearest != self.dragging_point and nearest_dist < SNAP_DIST:
+            snap = self.snap_candidate(x,y,[self.dragging_point])
+            print "SNAP",snap,
+            if type(snap) == squiglet.Point:
+                print "DRAGGING",self.dragging_point
                 for link in self.dragging_point.links:
-                    nearest.link(link.other(self.dragging_point))
+                    snap.link(link.other(self.dragging_point))
                 self.vector.remove_point(self.dragging_point)
-                    
             else:
-                self.dragging_point.pos = self.screen_to_vector(x,y)
+                if type(snap) == tuple:
+                    x,y = snap
+                self.dragging_point.pos = (x,y)
             self.dragging_point = None
             
         ## Normal Actions
         else:
             highlight = modifiers & key.MOD_SHIFT
             if button == mouse.LEFT:
-                nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
-                if nearest_dist > SNAP_DIST:
-                    new_point = self.vector.add_point(*self.screen_to_vector(x,y))
+                snap = self.snap_candidate(x,y)
+                if type(snap) == squiglet.Point:
+                    print "SNAP_POINT"
+                    if self.active_point:
+                        if modifiers & key.MOD_CTRL:
+                            self.active_point.link(snap,highlight)
+                        else:
+                            self.active_point.unlink(snap)
+                    self.active_point = snap
+                    
+                else:
+                    print snap
+                    if type(snap) == tuple:
+                        print "ARG"
+                        x,y = snap
+                    new_point = self.vector.add_point(x,y)
                     if self.active_point:
                         new_point.link(self.active_point,highlight)
                     else:
                         self.first_point = new_point
                     self.active_point = new_point
-                else:
-                    if self.active_point:
-                        if not modifiers & key.MOD_CTRL:
-                            self.active_point.link(nearest,highlight)
-                        else:
-                            print "DELETED"
-                            self.active_point.unlink(nearest)
-                    self.active_point = nearest
                 
             elif button == mouse.RIGHT and self.active_point:
                 if not len(self.active_point.links):
@@ -211,12 +223,21 @@ class GameWindow(Window):
                 self.active_point = self.first_point = None
     
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        x,y = self.screen_to_vector(x,y)
         if not self.dragging_point:
-            nearest, nearest_dist = self.vector.nearest_point(self.screen_to_vector(x,y))
+            nearest, nearest_dist = self.vector.nearest_point(x,y)
             if nearest_dist < SNAP_DIST:
                 self.dragging_point = nearest
         else:
-            self.dragging_point.pos = self.screen_to_vector(x,y)
+            snap = self.snap_candidate(x,y,[self.dragging_point])
+            if type(snap) == squiglet.Point:
+                print "A",snap
+                self.dragging_point.pos = snap.pos
+            elif type(snap) == tuple:
+                print "B"
+                self.dragging_point.pos = snap
+            else:
+                self.dragging_point.pos = (x,y)
             
     def on_key_press(self,pressed,modifiers):
         if pressed == key.S and modifiers & key.MOD_CTRL:
@@ -255,6 +276,16 @@ class GameWindow(Window):
             (x-(self.width/2))/self.view_scale,
             (y-(self.height/2))/self.view_scale
         )
+    
+    def snap_candidate(self,x,y,exclude=[]):
+        """ Test if there are any candidates of snap points, takes x,y in VECTOR oordinates not screen"""
+        nearest, nearest_dist = self.vector.nearest_point(x,y,exclude)
+        if nearest_dist < SNAP_DIST:
+            return nearest
+        elif (x%GRID_SIZE < GRID_SNAP_DIST or GRID_SIZE-x%GRID_SIZE < GRID_SNAP_DIST) and (y%GRID_SIZE < GRID_SNAP_DIST or GRID_SIZE-y%GRID_SIZE < GRID_SNAP_DIST):
+            return int(round(x/GRID_SIZE))*GRID_SIZE, int(round(y/GRID_SIZE))*GRID_SIZE
+        else:
+            return None
 
 if __name__ == '__main__':
     stdout.flush()
