@@ -25,12 +25,22 @@ Move a point\tClick and drag
 Save using\tCTRL-S
 Load using\tCTRL-L
 
+Grid size
+--increase  \t+
+--decrease  \t-
+
+Snap distance
+--increase  \tCTRL++
+--decrease  \tCTRL+-
+
 Open this help file\tF1 or CTRL-H
 """
 
 SQUARE_SIZE = 3
 
 SNAP_DIST = 5 # in pixels not vector units
+
+POINT_SNAP = True
 
 AA_SAMPLES = 4
 
@@ -52,7 +62,6 @@ GRID_ON = True
 GRID_SIZE = 1
 GRID_COLOUR = (75,75,75)
 GRID_SNAP = True
-GRID_SNAP_DIST = 5 #in pixels not vector units
 
 CENTER_ON = True
 CENTER_COLOUR = GRID_COLOUR
@@ -232,6 +241,8 @@ class GameWindow(Window):
                 self.dragging_point.pos = (x,y)
             
     def on_key_press(self,pressed,modifiers):
+        global SNAP_DIST
+        global GRID_SIZE
         if pressed == key.S and modifiers & key.MOD_CTRL:
             path = SaveAs()
             if path:
@@ -253,6 +264,16 @@ class GameWindow(Window):
             self.vector.remove_point(self.active_point)
             self.active_point = None
             self.first_point = None
+        elif pressed == key.NUM_ADD:
+            if modifiers & key.MOD_CTRL:
+                SNAP_DIST += 1
+            else:
+                GRID_SIZE *= 2
+        elif pressed == key.NUM_SUBTRACT:
+            if modifiers & key.MOD_CTRL:
+                SNAP_DIST -= 1
+            else:
+                GRID_SIZE /= 2
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print "ARG"
@@ -272,9 +293,9 @@ class GameWindow(Window):
     def snap_candidate(self,x,y,exclude=[]):
         """ Test if there are any candidates of snap points, takes x,y in VECTOR oordinates not screen"""
         nearest, nearest_dist = self.vector.nearest_point(x,y,exclude)
-        if nearest_dist < SNAP_DIST/self.view_scale:
+        if POINT_SNAP and nearest_dist < SNAP_DIST/self.view_scale:
             return nearest
-        elif (x%GRID_SIZE < GRID_SNAP_DIST/self.view_scale or GRID_SIZE-x%GRID_SIZE < GRID_SNAP_DIST/self.view_scale) and (y%GRID_SIZE < GRID_SNAP_DIST/self.view_scale or GRID_SIZE-y%GRID_SIZE < GRID_SNAP_DIST/self.view_scale):
+        elif GRID_ON and (x%GRID_SIZE < SNAP_DIST/self.view_scale or GRID_SIZE-x%GRID_SIZE < SNAP_DIST/self.view_scale) and (y%GRID_SIZE < SNAP_DIST/self.view_scale or GRID_SIZE-y%GRID_SIZE < SNAP_DIST/self.view_scale):
             return int(round(x/GRID_SIZE))*GRID_SIZE, int(round(y/GRID_SIZE))*GRID_SIZE
         else:
             return None
