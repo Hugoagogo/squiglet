@@ -30,7 +30,7 @@ Open this help file\tF1 or CTRL-H
 
 SQUARE_SIZE = 3
 
-SNAP_DIST = .4
+SNAP_DIST = 5 # in pixels not vector units
 
 AA_SAMPLES = 4
 
@@ -52,7 +52,7 @@ GRID_ON = True
 GRID_SIZE = 1
 GRID_COLOUR = (75,75,75)
 GRID_SNAP = True
-GRID_SNAP_DIST = .15
+GRID_SNAP_DIST = 5 #in pixels not vector units
 
 CENTER_ON = True
 CENTER_COLOUR = GRID_COLOUR
@@ -162,7 +162,7 @@ class GameWindow(Window):
         
     def on_mouse_motion(self, x, y, dx, dy):
         nearest, nearest_dist = self.vector.nearest_point(*self.screen_to_vector(x,y))
-        if nearest_dist < SNAP_DIST:
+        if nearest_dist < SNAP_DIST/self.view_scale:
             self.hover_point = nearest
         else:
             self.hover_point = None
@@ -196,9 +196,9 @@ class GameWindow(Window):
                     print "SNAP_POINT"
                     if self.active_point:
                         if modifiers & key.MOD_CTRL:
-                            self.active_point.link(snap,highlight)
-                        else:
                             self.active_point.unlink(snap)
+                        else:
+                            self.active_point.link(snap,highlight)
                     self.active_point = snap
                     
                 else:
@@ -226,7 +226,7 @@ class GameWindow(Window):
         x,y = self.screen_to_vector(x,y)
         if not self.dragging_point:
             nearest, nearest_dist = self.vector.nearest_point(x,y)
-            if nearest_dist < SNAP_DIST:
+            if nearest_dist < SNAP_DIST/self.view_scale:
                 self.dragging_point = nearest
         else:
             snap = self.snap_candidate(x,y,[self.dragging_point])
@@ -280,9 +280,9 @@ class GameWindow(Window):
     def snap_candidate(self,x,y,exclude=[]):
         """ Test if there are any candidates of snap points, takes x,y in VECTOR oordinates not screen"""
         nearest, nearest_dist = self.vector.nearest_point(x,y,exclude)
-        if nearest_dist < SNAP_DIST:
+        if nearest_dist < SNAP_DIST/self.view_scale:
             return nearest
-        elif (x%GRID_SIZE < GRID_SNAP_DIST or GRID_SIZE-x%GRID_SIZE < GRID_SNAP_DIST) and (y%GRID_SIZE < GRID_SNAP_DIST or GRID_SIZE-y%GRID_SIZE < GRID_SNAP_DIST):
+        elif (x%GRID_SIZE < GRID_SNAP_DIST/self.view_scale or GRID_SIZE-x%GRID_SIZE < GRID_SNAP_DIST/self.view_scale) and (y%GRID_SIZE < GRID_SNAP_DIST/self.view_scale or GRID_SIZE-y%GRID_SIZE < GRID_SNAP_DIST/self.view_scale):
             return int(round(x/GRID_SIZE))*GRID_SIZE, int(round(y/GRID_SIZE))*GRID_SIZE
         else:
             return None
