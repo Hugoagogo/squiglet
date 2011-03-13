@@ -48,6 +48,15 @@ POINT_COLOUR = (255,255,255)
 POINT_ACTIVE_COLOUR = (255,255,0)
 POINT_HOVER_COLOUR = (0,255,255)
 
+GRID_ON = True
+GRID_SIZE = 1
+GRID_COLOUR = (75,75,75)
+GRID_SNAP = True
+GRID_SNAP_DIST = 0.2
+
+CENTER_ON = True
+CENTER_COLOUR = GRID_COLOUR
+
 def SaveAs():
     root = Tkinter.Tk()
     root.withdraw()
@@ -76,12 +85,15 @@ def HelpBox():
     root.quit()
 
 class GameWindow(Window):
-    def __init__(self, view_size=(10,10),*args, **kwargs):
+    def __init__(self, view_size=(10,10),scale=(10),*args, **kwargs):
         Window.__init__(self, *args, **kwargs)
         self.set_mouse_visible(True)
         
-        self.view_scale = min(self.width/view_size[0],self.height/view_size[1])
+        self.view_scale = scale#min(self.width/view_size[0],self.height/view_size[1])
         self.view_size = view_size
+        
+        self.width = self.view_scale*self.view_size[0]
+        self.height = self.view_scale*self.view_size[1]
         
         self.setup()
     
@@ -98,6 +110,30 @@ class GameWindow(Window):
         
     def on_draw(self):
         self.clear()
+        if CENTER_ON:
+            gl.glBegin(gl.GL_POLYGON)
+            for delta in POINT_DELTAS:
+                gl.glColor3ub(*CENTER_COLOUR)
+                gl.glVertex2f(*util.add_tup(self.vector_to_screen(0,0),delta))
+                
+            gl.glEnd()
+        
+        if GRID_ON:
+            gl.glBegin(gl.GL_LINES)
+            for x in range(-int(self.view_size[0]/GRID_SIZE),int(self.view_size[0]/GRID_SIZE)):
+                gl.glColor3ub(*GRID_COLOUR)
+                gl.glColor3ub(*GRID_COLOUR)
+                gl.glVertex2f(*self.vector_to_screen(x*GRID_SIZE,-self.view_size[1]/2))
+                gl.glVertex2f(*self.vector_to_screen(x*GRID_SIZE,+self.view_size[1]/2))
+                
+            for y in range(-int(self.view_size[1]/GRID_SIZE),int(self.view_size[1]/GRID_SIZE)):
+                gl.glColor3ub(*GRID_COLOUR)
+                gl.glColor3ub(*GRID_COLOUR)
+                gl.glVertex2f(*self.vector_to_screen(-self.view_size[0]/2,y*GRID_SIZE))
+                gl.glVertex2f(*self.vector_to_screen(+self.view_size[0]/2,y*GRID_SIZE))
+            gl.glEnd()
+            
+            
         gl.glBegin(gl.GL_LINES)
         for link in self.vector.links:
             if link.highlight:
@@ -222,5 +258,5 @@ class GameWindow(Window):
 
 if __name__ == '__main__':
     stdout.flush()
-    win = GameWindow((21,21),config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
+    win = GameWindow((20,20),scale = 25,config = gl.Config(sample_buffers=1,samples=AA_SAMPLES))
     app.run()
