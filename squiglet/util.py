@@ -22,3 +22,9 @@ def multiply_tup(t1,t2):
 
 def scale_tup(t,scale):
     return (t[0]*scale,t[1]*scale)
+    
+def eq_tup(t1,t2): ## because floating point numbers dont equal each other often
+    for f1,f2 in zip(t1,t2):
+        if not round(f1,6) == round(f2,6):
+            return False
+    return True

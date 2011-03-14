@@ -4,6 +4,7 @@ from sys import stdout
 from math import pi
 import random
 import Tkinter, tkFileDialog, tkMessageBox
+import copy
 
 ## Custom Imports
 import __init__ as squiglet
@@ -21,6 +22,9 @@ Close loop\tMiddle Click
 Delete active point\tDelete
 Clear all points\tCTRL-D
 Move a point\tClick and drag
+
+Undo\t\tCTRL-Z
+Redo\t\tCTRL-SHIFT-Z
 
 Save using\tCTRL-S
 Load using\tCTRL-L
@@ -101,6 +105,8 @@ class GameWindow(Window):
         self.view_scale = scale#min(self.width/view_size[0],self.height/view_size[1])
         self.view_size = view_size
         
+        self.undo = UndoManager(self)
+        
         self.width = self.view_scale*self.view_size[0]
         self.height = self.view_scale*self.view_size[1]
         
@@ -119,6 +125,7 @@ class GameWindow(Window):
         
     def on_draw(self):
         self.clear()
+        
         if CENTER_ON:
             gl.glBegin(gl.GL_POLYGON)
             for delta in POINT_DELTAS:
@@ -206,7 +213,6 @@ class GameWindow(Window):
                     self.active_point = snap
                     
                 else:
-                    print snap
                     if type(snap) == tuple:
                         x,y = snap
                     new_point = self.vector.add_point(x,y)
@@ -224,6 +230,7 @@ class GameWindow(Window):
             elif button == mouse.MIDDLE and self.active_point and self.first_point:
                 self.first_point.link(self.active_point,highlight)
                 self.active_point = self.first_point = None
+        self.undo.save_state()
     
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         x,y = self.screen_to_vector(x,y)
@@ -274,6 +281,11 @@ class GameWindow(Window):
                 SNAP_DIST -= 1
             else:
                 GRID_SIZE /= 2
+        elif pressed == key.Z and modifiers & key.MOD_CTRL and modifiers & key.MOD_SHIFT:
+            self.undo.redo()
+        elif pressed == key.Z and modifiers & key.MOD_CTRL:
+            self.undo.undo()
+            
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         print "ARG"
@@ -299,6 +311,44 @@ class GameWindow(Window):
             return int(round(x/GRID_SIZE))*GRID_SIZE, int(round(y/GRID_SIZE))*GRID_SIZE
         else:
             return None
+
+class UndoManager(object):
+    def __init__(self,editor_window):
+        self.edit_win = editor_window
+        self.past_states = []
+        self.future_states = []
+    
+    def save_state(self):
+        self.future_states = []
+        self.past_states.append(UndoState(self.edit_win.vector.points,
+                                          self.edit_win.active_point,
+                                          self.edit_win.first_point))
+        
+    def undo(self):
+        if len(self.past_states):
+            print "UNDO"
+            self.future_states.append(self.past_states.pop())
+            self.edit_win.vector.points = self.past_states[-1].points
+            self.edit_win.active_point = self.past_states[-1].active
+            self.edit_win.first_point = self.past_states[-1].first
+    
+    def redo(self):
+        if len(self.future_states) >= 1:
+            print "REDO"
+            self.past_states.append(self.future_states.pop())
+            self.edit_win.vector.points = self.past_states[-1].points
+            self.edit_win.active_point = self.past_states[-1].active
+            self.edit_win.first_point = self.past_states[-1].first
+            
+class UndoState(object):
+    def __init__(self,points,active,first):
+        self.points = copy.deepcopy(points)
+        for point in self.points:
+            if util.eq_tup(point.pos, active.pos):
+                self.active = point
+            if util.eq_tup(point.pos, first.pos):
+                self.first = point
+        
 
 if __name__ == '__main__':
     stdout.flush()
